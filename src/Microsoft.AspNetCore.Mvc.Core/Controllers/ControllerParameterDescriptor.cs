@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 
@@ -15,5 +16,10 @@ namespace Microsoft.AspNetCore.Mvc.Controllers
         /// Gets or sets the <see cref="ParameterInfo"/>.
         /// </summary>
         public ParameterInfo ParameterInfo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Attributes"/>.
+        /// </summary>
+        public IReadOnlyList<object> Attributes { get; set; }
     }
 }

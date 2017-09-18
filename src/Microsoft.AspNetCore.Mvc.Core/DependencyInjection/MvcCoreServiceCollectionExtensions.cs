@@ -224,6 +224,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 var metadataProvider = s.GetRequiredService<IModelMetadataProvider>();
                 return new DefaultObjectValidator(metadataProvider, options.ModelValidatorProviders);
             });
+            services.TryAddSingleton<IParameterValidator>(s =>
+            {
+                var options = s.GetRequiredService<IOptions<MvcOptions>>().Value;
+                var metadataProvider = s.GetRequiredService<IModelMetadataProvider>();
+                return new DefaultParameterValidator(metadataProvider, options.ModelValidatorProviders);
+            });
             services.TryAddSingleton<ClientValidatorCache>();
             services.TryAddSingleton<ParameterBinder>();
 

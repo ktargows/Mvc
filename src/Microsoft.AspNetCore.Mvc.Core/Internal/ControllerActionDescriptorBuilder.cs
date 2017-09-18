@@ -254,6 +254,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 ParameterType = parameterModel.ParameterInfo.ParameterType,
                 BindingInfo = parameterModel.BindingInfo,
                 ParameterInfo = parameterModel.ParameterInfo,
+                Attributes = parameterModel.Attributes
             };
 
             return parameterDescriptor;

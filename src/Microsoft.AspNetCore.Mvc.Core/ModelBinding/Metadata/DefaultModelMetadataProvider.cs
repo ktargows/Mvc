@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +14,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
     /// <summary>
     /// A default implementation of <see cref="IModelMetadataProvider"/> based on reflection.
     /// </summary>
-    public class DefaultModelMetadataProvider : IModelMetadataProvider
+    public class DefaultModelMetadataProvider : IExtendedModelMetadataProvider
     {
         private readonly TypeCache _typeCache = new TypeCache();
         private readonly Func<ModelMetadataIdentity, ModelMetadataCacheEntry> _cacheEntryFactory;
@@ -97,6 +98,18 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             return cacheEntry.Details.Properties;
         }
 
+        public virtual ModelMetadata GetMetadataForParameter(ActionDescriptor action, ParameterDescriptor parameter)
+        {
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
+
+            var cacheEntry = GetCacheEntry(action, parameter);
+
+            return cacheEntry.Metadata;
+        }
+
         /// <inheritdoc />
         public virtual ModelMetadata GetMetadataForType(Type modelType)
         {
@@ -137,6 +150,13 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             }
 
             return cacheEntry;
+        }
+
+        private ModelMetadataCacheEntry GetCacheEntry(ActionDescriptor action, ParameterDescriptor parameter)
+        {
+            return _typeCache.GetOrAdd(
+                ModelMetadataIdentity.ForParameter(action, parameter),
+                _cacheEntryFactory);
         }
 
         private ModelMetadataCacheEntry CreateCacheEntry(ModelMetadataIdentity key)
@@ -232,15 +252,22 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         /// </remarks>
         protected virtual DefaultMetadataDetails CreateTypeDetails(ModelMetadataIdentity key)
         {
-            return new DefaultMetadataDetails(key, ModelAttributes.GetAttributesForType(key.ModelType));
+            ModelAttributes attributes;
+
+            if (key.MetadataKind == ModelMetadataKind.Parameter)
+            {
+                attributes = ModelAttributes.GetAttributesForParameter(key);
+            }
+            else
+            {
+                attributes = ModelAttributes.GetAttributesForType(key.ModelType);
+            }
+
+            return new DefaultMetadataDetails(key, attributes);
         }
 
         private class TypeCache : ConcurrentDictionary<ModelMetadataIdentity, ModelMetadataCacheEntry>
         {
-            public TypeCache()
-                : base(ModelMetadataIdentityComparer.Instance)
-            {
-            }
         }
 
         private struct ModelMetadataCacheEntry
@@ -254,37 +281,6 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             public ModelMetadata Metadata { get; }
 
             public DefaultMetadataDetails Details { get; }
-        }
-
-        private class ModelMetadataIdentityComparer : IEqualityComparer<ModelMetadataIdentity>
-        {
-            public static readonly ModelMetadataIdentityComparer Instance = new ModelMetadataIdentityComparer();
-
-            public bool Equals(ModelMetadataIdentity x, ModelMetadataIdentity y)
-            {
-                return
-                    x.ContainerType == y.ContainerType &&
-                    x.ModelType == y.ModelType &&
-                    x.Name == y.Name;
-            }
-
-            public int GetHashCode(ModelMetadataIdentity obj)
-            {
-                var hash = 17;
-                hash = hash * 23 + obj.ModelType.GetHashCode();
-
-                if (obj.ContainerType != null)
-                {
-                    hash = hash * 23 + obj.ContainerType.GetHashCode();
-                }
-
-                if (obj.Name != null)
-                {
-                    hash = hash * 23 + obj.Name.GetHashCode();
-                }
-
-                return hash;
-            }
         }
     }
 }

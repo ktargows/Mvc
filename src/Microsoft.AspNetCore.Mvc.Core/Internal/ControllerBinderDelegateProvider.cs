@@ -51,13 +51,19 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 {
                     var parameter = parameters[i];
                     var bindingInfo = parameterBindingInfo[i];
+                    var modelMetadata = bindingInfo.ModelMetadata;
+
+                    if (!modelMetadata.IsBindingAllowed)
+                    {
+                        continue;
+                    }
 
                     var result = await parameterBinder.BindModelAsync(
                         controllerContext,
                         bindingInfo.ModelBinder,
                         valueProvider,
                         parameter,
-                        bindingInfo.ModelMetadata,
+                        modelMetadata,
                         value: null);
 
                     if (result.IsModelSet)
@@ -71,13 +77,14 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 {
                     var property = properties[i];
                     var bindingInfo = propertyBindingInfo[i];
+                    var modelMetadata = bindingInfo.ModelMetadata;
 
                     var result = await parameterBinder.BindModelAsync(
                        controllerContext,
                        bindingInfo.ModelBinder,
                        valueProvider,
                        property,
-                       bindingInfo.ModelMetadata,
+                       modelMetadata,
                        value: null);
 
                     if (result.IsModelSet)
@@ -103,7 +110,23 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             for (var i = 0; i < parameters.Count; i++)
             {
                 var parameter = parameters[i];
-                var metadata = modelMetadataProvider.GetMetadataForType(parameter.ParameterType);
+
+                ModelMetadata metadata;
+                if (modelMetadataProvider is IExtendedModelMetadataProvider extendedModelMetadataProvider)
+                {
+                    // The default model metadata provider implements IExtendedModelMetadataProvider
+                    // and can therefore supply information about attributes applied to parameters
+                    metadata = extendedModelMetadataProvider.GetMetadataForParameter(actionDescriptor, parameter);
+                }
+                else
+                {
+                    // For backward compatibility, if there's a custom model metadata provider that
+                    // only implements the older IModelMetadataProvider interface, access the more
+                    // limited metadata information it supplies. In this scenario, validation attributes
+                    // are not supported on parameters.
+                    metadata = modelMetadataProvider.GetMetadataForType(parameter.ParameterType);
+                }
+
                 var binder = modelBinderFactory.CreateBinder(new ModelBinderFactoryContext
                 {
                     BindingInfo = parameter.BindingInfo,

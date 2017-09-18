@@ -15,18 +15,18 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
     {
         private readonly IModelMetadataProvider _modelMetadataProvider;
         private readonly IModelBinderFactory _modelBinderFactory;
-        private readonly IObjectModelValidator _validator;
+        private readonly IParameterValidator _parameterValidator;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ParameterDescriptor"/>.
         /// </summary>
         /// <param name="modelMetadataProvider">The <see cref="IModelMetadataProvider"/>.</param>
         /// <param name="modelBinderFactory">The <see cref="IModelBinderFactory"/>.</param>
-        /// <param name="validator">The <see cref="IObjectModelValidator"/>.</param>
+        /// <param name="parameterValidator">The <see cref="IParameterValidator"/>.</param>
         public ParameterBinder(
             IModelMetadataProvider modelMetadataProvider,
             IModelBinderFactory modelBinderFactory,
-            IObjectModelValidator validator)
+            IParameterValidator parameterValidator)
         {
             if (modelMetadataProvider == null)
             {
@@ -38,14 +38,14 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
                 throw new ArgumentNullException(nameof(modelBinderFactory));
             }
 
-            if (validator == null)
+            if (parameterValidator == null)
             {
-                throw new ArgumentNullException(nameof(validator));
+                throw new ArgumentNullException(nameof(parameterValidator));
             }
 
             _modelMetadataProvider = modelMetadataProvider;
             _modelBinderFactory = modelBinderFactory;
-            _validator = validator;
+            _parameterValidator = parameterValidator;
         }
 
         /// <summary>
@@ -185,14 +185,14 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
             await modelBinder.BindModelAsync(modelBindingContext);
 
             var modelBindingResult = modelBindingContext.Result;
-            if (modelBindingResult.IsModelSet)
-            {
-                _validator.Validate(
-                    actionContext,
-                    modelBindingContext.ValidationState,
-                    modelBindingContext.ModelName,
-                    modelBindingResult.Model);
-            }
+
+            _parameterValidator.Validate(
+                actionContext,
+                parameter,
+                metadata,
+                modelBindingResult.IsModelSet,
+                modelBindingResult.Model,
+                modelBindingContext);
 
             return modelBindingResult;
         }

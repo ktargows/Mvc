@@ -65,6 +65,26 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             };
         }
 
+        public static ModelMetadataIdentity ForParameter(ActionDescriptor action, ParameterDescriptor parameter)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
+
+            return new ModelMetadataIdentity()
+            {
+                ActionDescriptor = action,
+                Name = parameter.Name,
+                ModelType = parameter.ParameterType
+            };
+        }
+
         /// <summary>
         /// Gets the <see cref="Type"/> defining the model property represented by the current
         /// instance, or <c>null</c> if the current instance does not represent a property.
@@ -83,7 +103,11 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         {
             get
             {
-                if (ContainerType != null && Name != null)
+                if (ActionDescriptor != null)
+                {
+                    return ModelMetadataKind.Parameter;
+                }
+                else if (ContainerType != null && Name != null)
                 {
                     return ModelMetadataKind.Property;
                 }
@@ -100,13 +124,20 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// Gets a descriptor for the action, or <c>null</c> if this instance
+        /// does not represent a parameter.
+        /// </summary>
+        public ActionDescriptor ActionDescriptor { get; private set; }
+
         /// <inheritdoc />
         public bool Equals(ModelMetadataIdentity other)
         {
             return
                 ContainerType == other.ContainerType &&
                 ModelType == other.ModelType &&
-                Name == other.Name;
+                Name == other.Name &&
+                ActionDescriptor?.Id == other.ActionDescriptor?.Id;
         }
 
         /// <inheritdoc />
@@ -120,6 +151,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         public override int GetHashCode()
         {
             var hash = new HashCodeCombiner();
+            hash.Add(ActionDescriptor?.Id);
             hash.Add(ContainerType);
             hash.Add(ModelType);
             hash.Add(Name, StringComparer.Ordinal);
