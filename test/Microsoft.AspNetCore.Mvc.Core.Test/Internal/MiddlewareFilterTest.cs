@@ -446,7 +446,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 : base(
                     new EmptyModelMetadataProvider(),
                     TestModelBinderFactory.CreateDefault(),
-                    Mock.Of<IObjectModelValidator>())
+                    Mock.Of<IParameterValidator>())
             {
                 _actionParameters = actionParameters;
             }

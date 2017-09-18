@@ -77,24 +77,37 @@ namespace Microsoft.AspNetCore.Mvc.IntegrationTests
             return new ParameterBinder(
                 metadataProvider,
                 new ModelBinderFactory(metadataProvider, options),
-                GetObjectValidator(metadataProvider, options));
+                GetParameterValidator(metadataProvider, options));
         }
 
         public static IObjectModelValidator GetObjectValidator(
             IModelMetadataProvider metadataProvider,
             IOptions<MvcOptions> options = null)
         {
-            IList<IModelValidatorProvider> validatorProviders;
+            return new DefaultObjectValidator(
+                metadataProvider,
+                GetModelValidatorProviders(options));
+        }
+
+        public static IParameterValidator GetParameterValidator(
+            IModelMetadataProvider metadataProvider,
+            IOptions<MvcOptions> options = null)
+        {
+            return new DefaultParameterValidator(
+                metadataProvider,
+                GetModelValidatorProviders(options));
+        }
+
+        private static IList<IModelValidatorProvider> GetModelValidatorProviders(IOptions<MvcOptions> options)
+        {
             if (options == null)
             {
-                validatorProviders = TestModelValidatorProvider.CreateDefaultProvider().ValidatorProviders;
+                return TestModelValidatorProvider.CreateDefaultProvider().ValidatorProviders;
             }
             else
             {
-                validatorProviders = options.Value.ModelValidatorProviders;
+                return options.Value.ModelValidatorProviders;
             }
-
-            return new DefaultObjectValidator(metadataProvider, validatorProviders);
         }
 
         private static HttpContext GetHttpContext(

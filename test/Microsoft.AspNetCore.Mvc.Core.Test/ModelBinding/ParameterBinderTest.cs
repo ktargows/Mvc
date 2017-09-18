@@ -154,15 +154,17 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
             Assert.True(binderExecuted);
         }
 
-        private static IObjectModelValidator CreateMockValidator()
+        private static IParameterValidator CreateMockValidator()
         {
-            var mockValidator = new Mock<IObjectModelValidator>();
+            var mockValidator = new Mock<IParameterValidator>();
             mockValidator
                 .Setup(o => o.Validate(
                     It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
+                    It.IsAny<ParameterDescriptor>(),
+                    It.IsAny<ModelMetadata>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<object>(),
+                    It.IsAny<ModelBindingContext>()));
             return mockValidator.Object;
         }
 

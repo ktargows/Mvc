@@ -159,13 +159,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
 
             var factory = GetModelBinderFactory("Hello");
 
-            var mockValidator = new Mock<IObjectModelValidator>(MockBehavior.Strict);
-            mockValidator
-                .Setup(o => o.Validate(
-                    It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
+            var mockValidator = CreateMockValidator();
 
             var parameterBinder = GetParameterBinder(factory, mockValidator.Object);
             var controller = new TestController();
@@ -184,9 +178,11 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             mockValidator
                 .Verify(o => o.Validate(
                     It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()),
+                    It.IsAny<ParameterDescriptor>(),
+                    It.IsAny<ModelMetadata>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<object>(),
+                    It.IsAny<ModelBindingContext>()),
             Times.Once());
         }
 
@@ -212,14 +208,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 .Setup(b => b.BindModelAsync(It.IsAny<DefaultModelBindingContext>()))
                 .Returns(Task.CompletedTask);
 
-            var mockValidator = new Mock<IObjectModelValidator>(MockBehavior.Strict);
-            mockValidator
-                .Setup(o => o.Validate(
-                    It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
-
+            var mockValidator = CreateMockValidator();
             var factory = GetModelBinderFactory(binder.Object);
             var controller = new TestController();
             var parameterBinder = GetParameterBinder(factory, mockValidator.Object);
@@ -237,9 +226,11 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             mockValidator
                 .Verify(o => o.Validate(
                     It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()),
+                    It.IsAny<ParameterDescriptor>(),
+                    It.IsAny<ModelMetadata>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<object>(),
+                    It.IsAny<ModelBindingContext>()),
                 Times.Never());
         }
 
@@ -259,14 +250,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             var controller = new TestController();
             var arguments = new Dictionary<string, object>(StringComparer.Ordinal);
 
-            var mockValidator = new Mock<IObjectModelValidator>(MockBehavior.Strict);
-            mockValidator
-                .Setup(o => o.Validate(
-                    It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
-
+            var mockValidator = CreateMockValidator();
             var factory = GetModelBinderFactory("Hello");
             var parameterBinder = GetParameterBinder(factory, mockValidator.Object);
 
@@ -283,9 +267,11 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             mockValidator
                 .Verify(o => o.Validate(
                     It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()),
+                    It.IsAny<ParameterDescriptor>(),
+                    It.IsAny<ModelMetadata>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<object>(),
+                    It.IsAny<ModelBindingContext>()),
                 Times.Once());
         }
 
@@ -311,14 +297,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 .Setup(b => b.BindModelAsync(It.IsAny<DefaultModelBindingContext>()))
                 .Returns(Task.CompletedTask);
 
-            var mockValidator = new Mock<IObjectModelValidator>(MockBehavior.Strict);
-            mockValidator
-                .Setup(o => o.Validate(
-                    It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
-
+            var mockValidator = CreateMockValidator();
             var factory = GetModelBinderFactory(binder.Object);
             var parameterBinder = GetParameterBinder(factory, mockValidator.Object);
 
@@ -335,9 +314,11 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             mockValidator
                 .Verify(o => o.Validate(
                     It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()),
+                    It.IsAny<ParameterDescriptor>(),
+                    It.IsAny<ModelMetadata>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<object>(),
+                    It.IsAny<ModelBindingContext>()),
                 Times.Never());
         }
 
@@ -959,11 +940,11 @@ namespace Microsoft.AspNetCore.Mvc.Internal
 
         private static ParameterBinder GetParameterBinder(
             IModelBinderFactory factory = null,
-            IObjectModelValidator validator = null)
+            IParameterValidator validator = null)
         {
             if (validator == null)
             {
-                validator = CreateMockValidator();
+                validator = CreateMockValidator().Object;
             }
 
             if (factory == null)
@@ -977,16 +958,18 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 validator);
         }
 
-        private static IObjectModelValidator CreateMockValidator()
+        private static Mock<IParameterValidator> CreateMockValidator()
         {
-            var mockValidator = new Mock<IObjectModelValidator>(MockBehavior.Strict);
+            var mockValidator = new Mock<IParameterValidator>(MockBehavior.Strict);
             mockValidator
                 .Setup(o => o.Validate(
                     It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
-            return mockValidator.Object;
+                    It.IsAny<ParameterDescriptor>(),
+                    It.IsAny<ModelMetadata>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<object>(),
+                    It.IsAny<ModelBindingContext>()));
+            return mockValidator;
         }
 
         // No need for bind-related attributes on properties in this controller class. Properties are added directly
