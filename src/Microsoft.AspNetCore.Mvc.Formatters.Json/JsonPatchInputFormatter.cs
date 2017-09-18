@@ -63,6 +63,8 @@ namespace Microsoft.AspNetCore.Mvc.Formatters
             SupportedMediaTypes.Add(MediaTypeHeaderValues.ApplicationJsonPatch);
         }
 
+        public override bool SendBadRequestForExceptionsDuringDeserialization => GetType() == typeof(JsonPatchInputFormatter);
+
         /// <inheritdoc />
         public async override Task<InputFormatterResult> ReadRequestBodyAsync(
             InputFormatterContext context,

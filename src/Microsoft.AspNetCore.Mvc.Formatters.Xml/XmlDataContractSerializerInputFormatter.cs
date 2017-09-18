@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Mvc.Formatters
     /// This class handles deserialization of input XML data
     /// to strongly-typed objects using <see cref="DataContractSerializer"/>.
     /// </summary>
-    public class XmlDataContractSerializerInputFormatter : TextInputFormatter, IInbuiltInputFormatter
+    public class XmlDataContractSerializerInputFormatter : TextInputFormatter, IFormatterExceptionPolicy
     {
         private readonly ConcurrentDictionary<Type, object> _serializerCache = new ConcurrentDictionary<Type, object>();
         private readonly XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.GetDefaultXmlReaderQuotas();
@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.Mvc.Formatters
             }
         }
 
-        public virtual bool SendBadRequestForExceptionsDuringDeserialization => false;
+        public virtual bool SendBadRequestForExceptionsDuringDeserialization => GetType() == typeof(XmlDataContractSerializerInputFormatter);
 
         /// <inheritdoc />
         public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context, Encoding encoding)

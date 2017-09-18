@@ -3,7 +3,10 @@
 
 namespace Microsoft.AspNetCore.Mvc.Formatters
 {
-    public interface IInbuiltInputFormatter
+    /// <summary>
+    /// A policy which <see cref="IInputFormatter"/>s can use to indicate if they 
+    /// </summary>
+    public interface IFormatterExceptionPolicy
     {
         bool SendBadRequestForExceptionsDuringDeserialization { get; }
     }

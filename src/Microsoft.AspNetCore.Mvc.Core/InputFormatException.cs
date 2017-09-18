@@ -2,12 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace Microsoft.AspNetCore.Mvc
+namespace Microsoft.AspNetCore.Mvc.Formatters
 {
     /// <summary>
-    /// Exception thrown by <see cref="IInputFormatter"/> when the input format is not in an expected way.
+    /// Exception thrown by <see cref="IInputFormatter"/> when the input is not in an expected format.
     /// </summary>
     public class InputFormatException : Exception
     {
