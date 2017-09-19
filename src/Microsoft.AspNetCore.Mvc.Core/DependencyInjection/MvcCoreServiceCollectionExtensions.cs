@@ -158,7 +158,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddEnumerable(
                 ServiceDescriptor.Transient<IApplicationModelProvider, DefaultApplicationModelProvider>());
             services.TryAddEnumerable(
+                ServiceDescriptor.Transient<IApplicationModelProvider, ApiControllerApplicationModelProvider>());
+            services.TryAddEnumerable(
                 ServiceDescriptor.Transient<IActionDescriptorProvider, ControllerActionDescriptorProvider>());
+
             services.TryAddSingleton<IActionDescriptorCollectionProvider, ActionDescriptorCollectionProvider>();
 
             //

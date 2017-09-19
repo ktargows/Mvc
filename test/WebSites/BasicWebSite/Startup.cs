@@ -23,6 +23,7 @@ namespace BasicWebSite
             services.AddLogging();
             services.AddSingleton<IActionDescriptorProvider, ActionDescriptorCreationCounter>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<ContactsRepository>();
             services.AddScoped<RequestIdService>();
         }
 

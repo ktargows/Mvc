@@ -1,12 +1,15 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.ComponentModel.DataAnnotations;
+
 namespace BasicWebSite.Models
 {
     public class Contact
     {
         public int ContactId { get; set; }
 
+        [StringLength(30, MinimumLength = 3)]
         public string Name { get; set; }
 
         public GenderType Gender { get; set; }
