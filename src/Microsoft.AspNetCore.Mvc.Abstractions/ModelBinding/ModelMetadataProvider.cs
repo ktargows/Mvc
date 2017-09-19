@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 
 namespace Microsoft.AspNetCore.Mvc.ModelBinding
@@ -27,11 +28,10 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
         public abstract ModelMetadata GetMetadataForType(Type modelType);
 
         /// <summary>
-        /// Supplies metadata describing an action parameter.
+        /// Supplies metadata describing a parameter.
         /// </summary>
-        /// <param name="actionDescriptor">The <see cref="ActionDescriptor"/>.</param>
-        /// <param name="parameter">The <see cref="ParameterDescriptor"/>.</param>
+        /// <param name="parameter">The <see cref="ParameterInfo"/>.</param>
         /// <returns>A <see cref="ModelMetadata"/> instance describing properties of the <see cref="ActionDescriptor"/>.</returns>
-        public abstract ModelMetadata GetMetadataForParameter(ActionDescriptor actionDescriptor, ParameterDescriptor parameter);
+        public abstract ModelMetadata GetMetadataForParameter(ParameterInfo parameter);
     }
 }

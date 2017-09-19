@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Microsoft.AspNetCore.Mvc.Abstractions
@@ -14,7 +13,5 @@ namespace Microsoft.AspNetCore.Mvc.Abstractions
         public Type ParameterType { get; set; }
 
         public BindingInfo BindingInfo { get; set; }
-
-        public IReadOnlyList<object> Attributes { get; set; }
     }
 }

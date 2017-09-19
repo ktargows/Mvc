@@ -112,11 +112,12 @@ namespace Microsoft.AspNetCore.Mvc.Internal
                 var parameter = parameters[i];
 
                 ModelMetadata metadata;
-                if (modelMetadataProvider is ModelMetadataProvider modelMetadataProviderBase)
+                if (modelMetadataProvider is ModelMetadataProvider modelMetadataProviderBase
+                    && parameter is ControllerParameterDescriptor controllerParameterDescriptor)
                 {
                     // The default model metadata provider derives from ModelMetadataProvider
                     // and can therefore supply information about attributes applied to parameters.
-                    metadata = modelMetadataProviderBase.GetMetadataForParameter(actionDescriptor, parameter);
+                    metadata = modelMetadataProviderBase.GetMetadataForParameter(controllerParameterDescriptor.ParameterInfo);
                 }
                 else
                 {

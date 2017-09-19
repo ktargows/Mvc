@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.Extensions.Internal;
 
@@ -65,13 +66,8 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             };
         }
 
-        public static ModelMetadataIdentity ForParameter(ActionDescriptor action, ParameterDescriptor parameter)
+        public static ModelMetadataIdentity ForParameter(ParameterInfo parameter)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
             if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
@@ -79,9 +75,9 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
 
             return new ModelMetadataIdentity()
             {
-                ActionDescriptor = action,
                 Name = parameter.Name,
-                ModelType = parameter.ParameterType
+                ModelType = parameter.ParameterType,
+                ParameterInfo = parameter,
             };
         }
 
@@ -103,7 +99,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         {
             get
             {
-                if (ActionDescriptor != null)
+                if (ParameterInfo != null)
                 {
                     return ModelMetadataKind.Parameter;
                 }
@@ -125,10 +121,10 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         public string Name { get; private set; }
 
         /// <summary>
-        /// Gets a descriptor for the action, or <c>null</c> if this instance
+        /// Gets a descriptor for the parameter, or <c>null</c> if this instance
         /// does not represent a parameter.
         /// </summary>
-        public ActionDescriptor ActionDescriptor { get; private set; }
+        public ParameterInfo ParameterInfo { get; private set; }
 
         /// <inheritdoc />
         public bool Equals(ModelMetadataIdentity other)
@@ -137,7 +133,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
                 ContainerType == other.ContainerType &&
                 ModelType == other.ModelType &&
                 Name == other.Name &&
-                ActionDescriptor?.Id == other.ActionDescriptor?.Id;
+                ParameterInfo == other.ParameterInfo;
         }
 
         /// <inheritdoc />
@@ -151,10 +147,10 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         public override int GetHashCode()
         {
             var hash = new HashCodeCombiner();
-            hash.Add(ActionDescriptor?.Id);
             hash.Add(ContainerType);
             hash.Add(ModelType);
             hash.Add(Name, StringComparer.Ordinal);
+            hash.Add(ParameterInfo);
             return hash;
         }
     }

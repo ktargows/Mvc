@@ -175,8 +175,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
 
         public static ModelAttributes GetAttributesForParameter(ModelMetadataIdentity key)
         {
-            var parameter = key.ActionDescriptor?.Parameters.Single(p => p.Name.Equals(key.Name, StringComparison.Ordinal));
-            return new ModelAttributes(null, null, parameter.Attributes ?? _emptyAttributesCollection);
+            return new ModelAttributes(null, null, key.ParameterInfo.GetCustomAttributes());
         }
 
         private static Type GetMetadataType(Type type)

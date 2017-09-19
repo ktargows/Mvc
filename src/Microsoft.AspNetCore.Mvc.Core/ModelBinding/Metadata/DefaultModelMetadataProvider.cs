@@ -98,14 +98,14 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             return cacheEntry.Details.Properties;
         }
 
-        public override ModelMetadata GetMetadataForParameter(ActionDescriptor action, ParameterDescriptor parameter)
+        public override ModelMetadata GetMetadataForParameter(ParameterInfo parameter)
         {
             if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            var cacheEntry = GetCacheEntry(action, parameter);
+            var cacheEntry = GetCacheEntry(parameter);
 
             return cacheEntry.Metadata;
         }
@@ -152,10 +152,10 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             return cacheEntry;
         }
 
-        private ModelMetadataCacheEntry GetCacheEntry(ActionDescriptor action, ParameterDescriptor parameter)
+        private ModelMetadataCacheEntry GetCacheEntry(ParameterInfo parameter)
         {
             return _typeCache.GetOrAdd(
-                ModelMetadataIdentity.ForParameter(action, parameter),
+                ModelMetadataIdentity.ForParameter(parameter),
                 _cacheEntryFactory);
         }
 
