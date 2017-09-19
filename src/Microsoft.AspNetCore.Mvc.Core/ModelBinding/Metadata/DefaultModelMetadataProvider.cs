@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
     /// <summary>
     /// A default implementation of <see cref="IModelMetadataProvider"/> based on reflection.
     /// </summary>
-    public class DefaultModelMetadataProvider : IExtendedModelMetadataProvider
+    public class DefaultModelMetadataProvider : ModelMetadataProvider
     {
         private readonly TypeCache _typeCache = new TypeCache();
         private readonly Func<ModelMetadataIdentity, ModelMetadataCacheEntry> _cacheEntryFactory;
@@ -69,7 +69,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         protected DefaultModelBindingMessageProvider ModelBindingMessageProvider { get; }
 
         /// <inheritdoc />
-        public virtual IEnumerable<ModelMetadata> GetMetadataForProperties(Type modelType)
+        public override IEnumerable<ModelMetadata> GetMetadataForProperties(Type modelType)
         {
             if (modelType == null)
             {
@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
             return cacheEntry.Details.Properties;
         }
 
-        public virtual ModelMetadata GetMetadataForParameter(ActionDescriptor action, ParameterDescriptor parameter)
+        public override ModelMetadata GetMetadataForParameter(ActionDescriptor action, ParameterDescriptor parameter)
         {
             if (parameter == null)
             {
@@ -111,7 +111,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         }
 
         /// <inheritdoc />
-        public virtual ModelMetadata GetMetadataForType(Type modelType)
+        public override ModelMetadata GetMetadataForType(Type modelType)
         {
             if (modelType == null)
             {

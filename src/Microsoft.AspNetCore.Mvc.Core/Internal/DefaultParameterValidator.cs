@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Mvc.Internal
     {
         private readonly ValidatorCache _validatorCache;
         private readonly IModelValidatorProvider _validatorProvider;
-        private readonly IExtendedModelMetadataProvider _modelMetadataProvider;
+        private readonly ModelMetadataProvider _modelMetadataProvider;
 
         public DefaultParameterValidator(
             IModelMetadataProvider modelMetadataProvider,
@@ -30,9 +30,10 @@ namespace Microsoft.AspNetCore.Mvc.Internal
             _validatorCache = new ValidatorCache();
             _validatorProvider = new CompositeModelValidatorProvider(validatorProviders);
 
-            // Only the extended metadata provider interface provides information about properties,
-            // so if we don't get that type, this validator will do nothing.
-            _modelMetadataProvider = modelMetadataProvider as IExtendedModelMetadataProvider;
+            // Only types derived from the ModelMetadataProvider abstract base class will
+            // provide information about properties, so if we don't get that type, this
+            // validator will do nothing.
+            _modelMetadataProvider = modelMetadataProvider as ModelMetadataProvider;
         }
 
         public void Validate(ActionContext actionContext, ParameterDescriptor parameterDescriptor, ModelMetadata modelMetadata, bool isValueSet, object parameterValue, ModelBindingContext bindingContext)
