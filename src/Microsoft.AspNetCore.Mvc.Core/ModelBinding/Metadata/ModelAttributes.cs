@@ -21,6 +21,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
         /// Creates a new <see cref="ModelAttributes"/> for a <see cref="Type"/>.
         /// </summary>
         /// <param name="typeAttributes">The set of attributes for the <see cref="Type"/>.</param>
+        [Obsolete("This constructor is obsolete and will be removed in a future version. The recommended alternative is " + nameof(ModelAttributes) + "." + nameof(GetAttributesForType) + ".")]
         public ModelAttributes(IEnumerable<object> typeAttributes)
             : this(typeAttributes, null, null)
         {
@@ -33,12 +34,29 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
         /// <param name="typeAttributes">
         /// The set of attributes for the property's <see cref="Type"/>. See <see cref="PropertyInfo.PropertyType"/>.
         /// </param>
+        [Obsolete("This constructor is obsolete and will be removed in a future version. The recommended alternative is " + nameof(ModelAttributes) + "." + nameof(GetAttributesForProperty) + ".")]
         public ModelAttributes(IEnumerable<object> propertyAttributes, IEnumerable<object> typeAttributes)
             : this(typeAttributes, propertyAttributes, null)
         {
         }
 
-        private ModelAttributes(IEnumerable<object> typeAttributes, IEnumerable<object> propertyAttributes, IEnumerable<object> parameterAttributes)
+        /// <summary>
+        /// Creates a new <see cref="ModelAttributes"/>.
+        /// </summary>
+        /// <param name="typeAttributes">
+        /// If this instance represents a type, the set of attributes for that type.
+        /// If this instance represents a property, the set of attributes for the property's <see cref="Type"/>.
+        /// Otherwise, <c>null</c>.
+        /// </param>
+        /// <param name="propertyAttributes">
+        /// If this instance represents a property, the set of attributes for that property.
+        /// Otherwise, <c>null</c>.
+        /// </param>
+        /// <param name="parameterAttributes">
+        /// If this instance represents a parameter, the set of attributes for that parameter.
+        /// Otherwise, <c>null</c>.
+        /// </param>
+        public ModelAttributes(IEnumerable<object> typeAttributes, IEnumerable<object> propertyAttributes, IEnumerable<object> parameterAttributes)
         {
             if (propertyAttributes != null)
             {
@@ -128,7 +146,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
                 }
             }
 
-            return new ModelAttributes(propertyAttributes, typeAttributes);
+            return new ModelAttributes(typeAttributes, propertyAttributes, null);
         }
 
         /// <summary>
@@ -152,7 +170,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
                 attributes = attributes.Concat(metadataType.GetTypeInfo().GetCustomAttributes());
             }
 
-            return new ModelAttributes(attributes);
+            return new ModelAttributes(attributes, null, null);
         }
 
         public static ModelAttributes GetAttributesForParameter(ModelMetadataIdentity key)
