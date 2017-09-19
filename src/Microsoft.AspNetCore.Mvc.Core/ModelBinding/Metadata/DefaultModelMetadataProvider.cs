@@ -161,7 +161,16 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
 
         private ModelMetadataCacheEntry CreateCacheEntry(ModelMetadataIdentity key)
         {
-            var details = CreateTypeDetails(key);
+            DefaultMetadataDetails details;
+            if (key.MetadataKind == ModelMetadataKind.Parameter)
+            {
+                details = CreateParameterDetails(key);
+            }
+            else
+            {
+                details = CreateTypeDetails(key);
+            }
+
             var metadata = CreateModelMetadata(details);
             return new ModelMetadataCacheEntry(metadata, details);
         }
@@ -252,18 +261,16 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
         /// </remarks>
         protected virtual DefaultMetadataDetails CreateTypeDetails(ModelMetadataIdentity key)
         {
-            ModelAttributes attributes;
+            return new DefaultMetadataDetails(
+                key,
+                ModelAttributes.GetAttributesForType(key.ModelType));
+        }
 
-            if (key.MetadataKind == ModelMetadataKind.Parameter)
-            {
-                attributes = ModelAttributes.GetAttributesForParameter(key);
-            }
-            else
-            {
-                attributes = ModelAttributes.GetAttributesForType(key.ModelType);
-            }
-
-            return new DefaultMetadataDetails(key, attributes);
+        protected virtual DefaultMetadataDetails CreateParameterDetails(ModelMetadataIdentity key)
+        {
+            return new DefaultMetadataDetails(
+                key,
+                ModelAttributes.GetAttributesForParameter(key));
         }
 
         private class TypeCache : ConcurrentDictionary<ModelMetadataIdentity, ModelMetadataCacheEntry>
