@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
                 // Represents a parameter
                 Attributes = ParameterAttributes = parameterAttributes.ToArray();
             }
-            else
+            else if (typeAttributes != null)
             {
                 // Represents a type
                 if (typeAttributes == null)
@@ -176,18 +176,7 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
         public static ModelAttributes GetAttributesForParameter(ModelMetadataIdentity key)
         {
             var parameter = key.ActionDescriptor?.Parameters.Single(p => p.Name.Equals(key.Name, StringComparison.Ordinal));
-            IEnumerable<object> parameterAttributes;
-
-            if (parameter is ControllerParameterDescriptor controllerParameter)
-            {
-                parameterAttributes = controllerParameter.Attributes;
-            }
-            else
-            {
-                parameterAttributes = _emptyAttributesCollection;
-            }
-
-            return new ModelAttributes(null, null, parameterAttributes);
+            return new ModelAttributes(null, null, parameter.Attributes ?? _emptyAttributesCollection);
         }
 
         private static Type GetMetadataType(Type type)
