@@ -224,14 +224,14 @@ namespace Microsoft.Extensions.DependencyInjection
                 var metadataProvider = s.GetRequiredService<IModelMetadataProvider>();
                 return new DefaultObjectValidator(metadataProvider, options.ModelValidatorProviders);
             });
-            services.TryAddSingleton<IParameterValidator>(s =>
+            services.TryAddSingleton<ClientValidatorCache>();
+            services.TryAddSingleton<ParameterBinder>(s =>
             {
                 var options = s.GetRequiredService<IOptions<MvcOptions>>().Value;
                 var metadataProvider = s.GetRequiredService<IModelMetadataProvider>();
-                return new DefaultParameterValidator(metadataProvider, options.ModelValidatorProviders);
+                var modelBinderFactory = s.GetRequiredService<IModelBinderFactory>();
+                return new ParameterBinder(metadataProvider, modelBinderFactory, options.ModelValidatorProviders);
             });
-            services.TryAddSingleton<ClientValidatorCache>();
-            services.TryAddSingleton<ParameterBinder>();
 
             //
             // Random Infrastructure

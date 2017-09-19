@@ -2,8 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Microsoft.AspNetCore.Mvc.ModelBinding
@@ -15,18 +17,19 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
     {
         private readonly IModelMetadataProvider _modelMetadataProvider;
         private readonly IModelBinderFactory _modelBinderFactory;
-        private readonly IParameterValidator _parameterValidator;
+        private readonly ValidatorCache _validatorCache;
+        private readonly IModelValidatorProvider _validatorProvider;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ParameterDescriptor"/>.
         /// </summary>
         /// <param name="modelMetadataProvider">The <see cref="IModelMetadataProvider"/>.</param>
         /// <param name="modelBinderFactory">The <see cref="IModelBinderFactory"/>.</param>
-        /// <param name="parameterValidator">The <see cref="IParameterValidator"/>.</param>
+        /// <param name="validatorProviders">The <see cref="IModelValidatorProvider"/> instances.</param>
         public ParameterBinder(
             IModelMetadataProvider modelMetadataProvider,
             IModelBinderFactory modelBinderFactory,
-            IParameterValidator parameterValidator)
+            IList<IModelValidatorProvider> validatorProviders)
         {
             if (modelMetadataProvider == null)
             {
@@ -38,14 +41,10 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
                 throw new ArgumentNullException(nameof(modelBinderFactory));
             }
 
-            if (parameterValidator == null)
-            {
-                throw new ArgumentNullException(nameof(parameterValidator));
-            }
-
             _modelMetadataProvider = modelMetadataProvider;
             _modelBinderFactory = modelBinderFactory;
-            _parameterValidator = parameterValidator;
+            _validatorCache = new ValidatorCache();
+            _validatorProvider = new CompositeModelValidatorProvider(validatorProviders);
         }
 
         /// <summary>
@@ -186,15 +185,47 @@ namespace Microsoft.AspNetCore.Mvc.ModelBinding
 
             var modelBindingResult = modelBindingContext.Result;
 
-            _parameterValidator.Validate(
+            Validate(
                 actionContext,
                 parameter,
                 metadata,
-                modelBindingResult.IsModelSet,
-                modelBindingResult.Model,
-                modelBindingContext);
+                modelBindingContext,
+                modelBindingResult);
 
             return modelBindingResult;
+        }
+
+        private void Validate(
+            ActionContext actionContext,
+            ParameterDescriptor parameterDescriptor,
+            ModelMetadata modelMetadata,
+            ModelBindingContext bindingContext,
+            ModelBindingResult modelBindingResult)
+        {
+            if (modelBindingResult.IsModelSet || modelMetadata.IsRequired)
+            {
+                var visitor = new ValidationVisitor(
+                    actionContext,
+                    _validatorProvider,
+                    _validatorCache,
+                    _modelMetadataProvider,
+                    bindingContext.ValidationState);
+
+                var isValid = visitor.Validate(modelMetadata, bindingContext.ModelName, modelBindingResult.Model, skipNullAtTopLevel: !modelMetadata.IsRequired);
+                if (!isValid)
+                {
+                    // Only add one validation error in the case where both [Required] and
+                    // [BindRequired] are specified
+                    return;
+                }
+            }
+
+            if (!modelBindingResult.IsModelSet && modelMetadata.IsBindingRequired)
+            {
+                var fieldName = bindingContext.FieldName ?? modelMetadata.BinderModelName;
+                var message = modelMetadata.ModelBindingMessageProvider.MissingBindRequiredValueAccessor(fieldName);
+                actionContext.ModelState.TryAddModelError(bindingContext.ModelName, message);
+            }
         }
     }
 }
